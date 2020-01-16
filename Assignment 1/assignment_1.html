@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Assignment 1</title>
+	<script src="../lib/webgl-utils.js"></script>
+    <script src="../lib/webgl-debug.js"></script>
+    <script src="../lib/cuon-utils.js"></script>
+    <script src="../lib/cuon-matrix.js"></script>
+    <script src="assignment_1.js"></script>
+  </head>
+ 
+  <body onload="main()">
+    <canvas id="webgl" width="400" height="400">
+    Please use a browser that supports "canvas"
+    </canvas>
+	<br>
+	<button onclick="clearCanvas()">Clear Canvas</button>
+	<p id="clear"></p>
+	<strong>Drawing Mode:<strong>
+	<br>
+	<button onclick="square()" id="square">Squares</button> 
+	<button onclick="triangle()" id="triangle">Triangles</button>
+	<button onclick="circle()" id="circle">Circles</button>
+	<br>
+	Shape Color:
+	<br>
+	<div class="slidecontainer">
+		Red <input type="range" min="0" max="255" value="128" class="slider" id="redRange">
+		Green <input type="range" min="0" max="255" value="128" class="slider" id="greenRange">
+		Blue <input type="range" min="0" max="255" value="128" class="slider" id="blueRange">	
+	</div>
+	<br>
+	<div class="slidecontainer">
+		Shape Size: <input type="range" min="1" max="100" value="50" class="slider" id="sizeRange">
+		(Circles) Segment Count: <input type="range" min="1" max="100" value="50" class="slider" id="segmentRange">
+	</div>
+  </body>
+  
+</html>
