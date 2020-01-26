@@ -1,6 +1,7 @@
 // HelloTriangle.js (c) 2012 matsuda
 // Vertex shader program
 // Nathan Baledio
+// CSE 160
 var VSHADER_SOURCE =
   'attribute vec4 a_Position;\n' +
   'attribute vec4 a_Color;\n' +
