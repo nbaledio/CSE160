@@ -31,6 +31,11 @@ var translatersIndex = 0;
 var scalersIndex = 0;
 var rotation = 0;
 var increment = 1;
+var thetaFace = 0;
+var thetaFaceIncrement = 1;
+var value = 45;
+var prevX = 45;
+var newX = 45;
 
 function main() {
   // Retrieve <canvas> element
@@ -53,21 +58,21 @@ function main() {
   }
   
   // Set the vertex coordinates and color 
-  initVertexBuffers(gl,-1.6,-.2,0,.7,.6,.6,255/255,198/255,166/255); //snout
-  initVertexBuffers(gl,-1.9,0,0,.2,.2,.2,0,0,0); // nose
-  initVertexBuffers(gl,-1.61,-.39,0,.7,.2,.65,0,0,0); // mouth
-  initVertexBuffers(gl,-1,0,0,1,1,1,186/255,186/255,186/255); //head 
-  initVertexBuffers(gl,-1,.6,-.3,.1,.4,.3,115/255,115/255,115/255); // left ear
-  initVertexBuffers(gl,-1,.6,.3,.1,.4,.3,115/255,115/255,115/255); // right ear
-  initVertexBuffers(gl,-1.45,.2,-.3,.2,.2,.2,0,0,0); // left eye
-  initVertexBuffers(gl,-1.45,.2,.3,.2,.2,.2,0,0,0); // right eye
-  initVertexBuffers(gl,-.3,0,0,1.2,1.2,1.2,195/255,195/255,195/255); // collar 
+  initVertexBuffers(gl,-1,0,0,1.1,1.1,1.1,186/255,186/255,186/255); //head 0
+  initVertexBuffers(gl,-1.3,-.2,0,.7,.6,.6,255/255,198/255,166/255); //snout 216
+  initVertexBuffers(gl,-1.31,-.39,0,.7,.2,.65,0,0,0); // mouth 432
+  initVertexBuffers(gl,-.3,.7,-.28,.1,.3,.3,115/255,115/255,115/255); // left ear 648
+  initVertexBuffers(gl,-.3,.7,.28,.1,.3,.3,115/255,115/255,115/255); // right ear 864
+  initVertexBuffers(gl,-1.2,.2,-.3,.2,.2,.2,0,0,0); // left eye  1080
+  initVertexBuffers(gl,-1.2,.2,.3,.2,.2,.2,0,0,0); // right eye  1296
+  initVertexBuffers(gl,-1.4,0,0,.4,.2,.2,0,0,0); // nose 1512
+  initVertexBuffers(gl,-.3,0,0,1.2,1.2,1.2,195/255,195/255,195/255); // collar 1728
   initVertexBuffers(gl,0,0,0,1,1,1,200/255,200/255,200/255); //upper body 
   initVertexBuffers(gl,.7,0,0,1.3,1,1,200/255,200/255,200/255); // lower body
-  initVertexBuffers(gl,-.5,-.7,.3,.3,1.1,.3,180/255,180/255,180/255); // front left leg
-  initVertexBuffers(gl,-.5,-.7,-.3,.3,1.1,.3,180/255,180/255,180/255); // front right leg
-  initVertexBuffers(gl,.9,-.7,.3,.3,1.1,.3,180/255,180/255,180/255); // back left leg
-  initVertexBuffers(gl,.9,-.7,-.3,.3,1.1,.3,180/255,180/255,180/255); // back right leg
+  initVertexBuffers(gl,-.5,-.7,.3,.3,1.1,.3,180/255,180/255,180/255); // front left leg (BufferIndex 2376)
+  initVertexBuffers(gl,-.5,-.7,-.3,.3,1.1,.3,180/255,180/255,180/255); // front right leg (BufferIndex 2592)
+  initVertexBuffers(gl,.8,-.7,.3,.3,1.1,.3,180/255,180/255,180/255); // back left leg (BufferIndex 2808)
+  initVertexBuffers(gl,.8,-.7,-.3,.3,1.1,.3,180/255,180/255,180/255); // back right leg (BufferIndex 3024)
   initVertexBuffers(gl,1.6,-.1,0,.3,1.1,.3,204/255,204/255,204/255); // tail
   
   if (n < 0) {
@@ -76,7 +81,7 @@ function main() {
   }
 
   // Specify the color for clearing <canvas>
-  gl.clearColor(0.0, 1.0, 0.0, 1.0);
+  gl.clearColor(0.0, 170/255, 0.0, 1.0);
   
   // Get the storage location of u_mvpMatrix
   var u_mvpMatrix = gl.getUniformLocation(gl.program, 'u_mvpMatrix');
@@ -102,23 +107,27 @@ function main() {
   //Initial translation/scale
   scale();
   rotateTail();
+  offset();
   translate();
   
   // Start drawing
   var tick = function() {
-  if(rotation != document.getElementById("perspectiveYRange").value){
-    draw(gl,canvas);   // Draw the animal
-  }
-  requestAnimationFrame(tick,canvas); // Request that the browser ?calls tick
-}
-tick();
+	draw(gl,canvas);   // Draw the animal
+	requestAnimationFrame(tick,canvas); // Request that the browser ?calls tick
+	}
+	tick();
+	
+  //Used for click and drag
+  var mouse_down = false;
+  
+  // Register function (event handler) to be called on a mouse press and mouse move
+  canvas.onmousedown = function(ev){mouse_down=true; click(); }; 
+  canvas.onmouseup = function(ev){ mouse_down=false; }; 
+  canvas.onmousemove = function(ev){ if(mouse_down)click(); };
 }
 
 function draw(gl,canvas){
-	untranslate();
-	translate();
     rotateY();
-
 	rotation = (document.getElementById("perspectiveYRange").value);
 
 	// Create a buffer object
@@ -249,6 +258,8 @@ function rotateY(){
 	  buffer_data[i+2] =  z;
   }
   
+  animateLegs();
+  
   //Apply new rotation
   thetaY = (document.getElementById("perspectiveYRange").value*Math.PI)/180;
   //Rotate around y axis
@@ -317,26 +328,157 @@ function rotateTail(){
 }
 
 function animateLegs(){
-	//Reset rotation
-	for(i = 2160; i < buffer_data.length-216; i+=6){
-	  var x = (Math.cos(-thetaZ)*buffer_data[i])+(-Math.sin(-thetaZ)*buffer_data[i+1]);
-	  var y = (Math.sin(-thetaZ)*buffer_data[i])+(Math.cos(-thetaZ)*buffer_data[i+1]);
+	untranslate();
+	
+	var theta = (thetaZ*Math.PI)/180;
+	
+	//Reset rotation Back right
+	for(i = 3024; i < buffer_data.length-216; i+=6){
+	  var x = (Math.cos(-theta)*buffer_data[i])+(-Math.sin(-theta)*buffer_data[i+1]);
+	  var y = (Math.sin(-theta)*buffer_data[i])+(Math.cos(-theta)*buffer_data[i+1]);
 	  buffer_data[i] = x;
 	  buffer_data[i+1] = y;
 	}
 	
-		if(thetaZ == 45){
+	//Reset rotation front left
+	for(i = 2376; i < buffer_data.length-864; i+=6){
+	  var x = (Math.cos(-theta)*buffer_data[i])+(-Math.sin(-theta)*buffer_data[i+1]);
+	  var y = (Math.sin(-theta)*buffer_data[i])+(Math.cos(-theta)*buffer_data[i+1]);
+	  buffer_data[i] = x;
+	  buffer_data[i+1] = y;
+	}
+	
+	//Reset rotation back left
+	for(i = 2808; i < buffer_data.length-432; i+=6){
+	  var x = (Math.cos(theta)*buffer_data[i])+(-Math.sin(theta)*buffer_data[i+1]);
+	  var y = (Math.sin(theta)*buffer_data[i])+(Math.cos(theta)*buffer_data[i+1]);
+	  buffer_data[i] = x;
+	  buffer_data[i+1] = y;
+	}
+	
+	//Reset rotation back left
+	for(i = 2592; i < buffer_data.length-648; i+=6){
+	  var x = (Math.cos(theta)*buffer_data[i])+(-Math.sin(theta)*buffer_data[i+1]);
+	  var y = (Math.sin(theta)*buffer_data[i])+(Math.cos(theta)*buffer_data[i+1]);
+	  buffer_data[i] = x;
+	  buffer_data[i+1] = y;
+	}
+	
+	//Reset head
+	for(i = 0; i < 216; i+=6){
+	  var x = (Math.cos(theta)*buffer_data[i])+(Math.sin(theta)*buffer_data[i+2]);
+	  var z = (-Math.sin(theta)*buffer_data[i])+(Math.cos(theta)*buffer_data[i+2]);
+	  buffer_data[i] = x;
+	  buffer_data[i+2] = z;
+	}
+
+	//Reset face
+	for(i = 216; i < 1728; i+=6){
+	  var x = (Math.cos(theta)*buffer_data[i])+(Math.sin(theta)*buffer_data[i+2]);
+	  var z = (-Math.sin(theta)*buffer_data[i])+(Math.cos(theta)*buffer_data[i+2]);
+	  buffer_data[i] = x;
+	  buffer_data[i+2] = z;
+	}		
+
+	//Change theta
+	if(thetaZ == 35){
 		increment = -1;
-	}else if(thetaZ == -45){
-		increment= 1;
+		increasing = true;
+	}else if(thetaZ == -35){
+		increment = 1;
+		increasing = true;
 	}
-	thetaZ += increment;
+	if(thetaZ == 0){
+		increasing = false;
+	}
 	
-	//Rotate to new angle
-	for(i = 2160; i < buffer_data.length-216; i+=6){
-	  var x = (Math.cos(-thetaZ)*buffer_data[i])+(-Math.sin(-thetaZ)*buffer_data[i+1]);
-	  var y = (Math.sin(-thetaZ)*buffer_data[i])+(Math.cos(-thetaZ)*buffer_data[i+1]);
+	thetaZ += increment;
+	theta = (thetaZ*Math.PI)/180;
+
+	//Rotate to new angle back right
+	for(i = 3024; i < buffer_data.length-216; i+=6){
+	  var x = (Math.cos(theta)*buffer_data[i])+(-Math.sin(theta)*buffer_data[i+1]);
+	  var y = (Math.sin(theta)*buffer_data[i])+(Math.cos(theta)*buffer_data[i+1]);
 	  buffer_data[i] = x;
 	  buffer_data[i+1] = y;
 	}
+	
+	//Rotate to new angle front left
+	for(i = 2376; i < buffer_data.length-864; i+=6){
+	  var x = (Math.cos(theta)*buffer_data[i])+(-Math.sin(theta)*buffer_data[i+1]);
+	  var y = (Math.sin(theta)*buffer_data[i])+(Math.cos(theta)*buffer_data[i+1]);
+	  buffer_data[i] = x;
+	  buffer_data[i+1] = y;
+	}
+	
+	//Rotate to new angle back left
+	for(i = 2808; i < buffer_data.length-432; i+=6){
+	  var x = (Math.cos(-theta)*buffer_data[i])+(-Math.sin(-theta)*buffer_data[i+1]);
+	  var y = (Math.sin(-theta)*buffer_data[i])+(Math.cos(-theta)*buffer_data[i+1]);
+	  buffer_data[i] = x;
+	  buffer_data[i+1] = y;
+	}
+	
+	//Rotate to new angle back left
+	for(i = 2592; i < buffer_data.length-648; i+=6){
+	  var x = (Math.cos(-theta)*buffer_data[i])+(-Math.sin(-theta)*buffer_data[i+1]);
+	  var y = (Math.sin(-theta)*buffer_data[i])+(Math.cos(-theta)*buffer_data[i+1]);
+	  buffer_data[i] = x;
+	  buffer_data[i+1] = y;
+	}
+	
+	//Rotate Head
+	for(i = 0; i < 216; i+=6){
+	  var x = (Math.cos(-theta)*buffer_data[i])+(Math.sin(-theta)*buffer_data[i+2]);
+	  var z = (-Math.sin(-theta)*buffer_data[i])+(Math.cos(-theta)*buffer_data[i+2]);
+	  buffer_data[i] = x;
+	  buffer_data[i+2] = z;
+	}
+	
+	//Rotate Face
+	for(i = 216; i < 1728; i+=6){
+	  var x = (Math.cos(-theta)*buffer_data[i])+(Math.sin(-theta)*buffer_data[i+2]);
+	  var z = (-Math.sin(-theta)*buffer_data[i])+(Math.cos(-theta)*buffer_data[i+2]);
+	  buffer_data[i] = x;
+	  buffer_data[i+2] = z;
+	}
+	
+	translate();
+}
+
+function offset(){
+	//snout
+	for(i = 216; i < 648; i+=6){
+	  buffer_data[i] -= .6;
+	}
+	
+	//ears
+	for(i = 648; i < 1080; i+=6){
+	  buffer_data[i] -= .65;
+	}
+	
+	//eyes
+	for(i = 1080; i < 1512; i+=6){
+	  buffer_data[i] -= .5;
+	}
+	
+	//nose
+	for(i = 1512; i < 1728; i+=6){
+	  buffer_data[i] -= .8;
+	}
+}
+
+function click(){
+	prevX = newX;
+	newX = event.clientX;
+	if(newX > prevX){
+		if(document.getElementById("perspectiveYRange").value < 360){
+			value += 7;
+		}
+	}else if(newX < prevX){
+		if(document.getElementById("perspectiveYRange").value > 0){
+			value -= 7;
+		}
+	}
+	document.getElementById("perspectiveYRange").value = value;
 }
