@@ -21,7 +21,7 @@ var FSHADER_SOURCE =
   '  gl_FragColor = texture2D(u_Sampler, v_TexCoord);\n' +
   '}\n';
   
-var n = 36 * 716;
+var n = 36*3;
 var buffer_data = new Float32Array();
 var translaters = [];
 var scalers = [];
@@ -38,15 +38,7 @@ var value = 45;
 var prevX = 45;
 var newX = 45;
 
-var TranslateX = -2;
-var TranslateY = 0;
-var TranslateZ = -2;
-var lookAngle = 0;
-
 function main() {
-  //Add keydown event listener
-  document.addEventListener('keydown', updateCamera);
-  
   // Retrieve <canvas> element
   var canvas = document.getElementById('webgl');
 
@@ -66,118 +58,23 @@ function main() {
     return;
   }
   
-  // Set the vertex coordinates of cubes
-  initVertexBuffers(gl,0,-51,0,500.0,100.0,500.0,80/255,237/255,69/255);
-  
-  //Make surrounding walls
-  //Horizontal
-  for(var j = 0; j < 4; j++){
-	  for(var i = 0; i < 64; i++){
-		if(i < 32){
-		  initVertexBuffers(gl,(i/2)-7,j/2,-4,.5,.5,.5,255/255,0/255,0/255);
-		}else{
-		  initVertexBuffers(gl,(i/2)-23,j/2,12,.5,.5,.5,255/255,255/255,0/255);
-		}	
-		n++;
-	  }
-  } 
-  //Vertical
-  for(var j = 0; j < 4; j++){
-	  for(var i = 0; i < 64; i++){
-	    if(i < 32){
-		  initVertexBuffers(gl,9,j/2,(i/2)-4,.5,.5,.5,0/255,255/255,255/255);
-	    }else{
-		  initVertexBuffers(gl,-7,j/2,(i/2)-20,.5,.5,.5,255/255,0/255,255/255);
-	    }
-		
-      }
-  }
-  
-  //Filler walls(in no particular arrangement)
-  for(var i = 0; i < 20; i++){
-	  if(i < 10){
-		  initVertexBuffers(gl,5,0,(i/2)-4,.5,.5,.5,255/255,255/255,255/255);
-	  }else{
-		  initVertexBuffers(gl,5,0,(i/2)+2,.5,.5,.5,255/255,255/255,255/255);
-	  }
-  } 
-  for(var i = 0; i < 15; i++){
-	  if(i < 10){
-		  initVertexBuffers(gl,5,.5,(i/2)-4,.5,.5,.5,255/255,255/255,255/255);
-	  }else{
-		  initVertexBuffers(gl,5,.5,(i/2)+3,.5,.5,.5,255/255,255/255,255/255);
-	  }
-  } 
-  for(var i = 0; i < 15; i++){
-	  if(i < 10){
-		  initVertexBuffers(gl,5,1,(i/2)-4,.5,.5,.5,255/255,255/255,255/255);
-	  }else{
-		  initVertexBuffers(gl,5,1,(i/2)+5,.5,.5,.5,255/255,255/255,255/255);
-	  }
-  } 
-  for(var i = 0; i < 20; i++){
-	  if(i < 13){
-		  initVertexBuffers(gl,-2,0,(i/2)-4,.5,.5,.5,255/255,255/255,255/255);
-	  }else{
-		  initVertexBuffers(gl,-2,0,(i/2)+2,.5,.5,.5,255/255,255/255,255/255);
-	  }
-  }
-  for(var i = 0; i < 15; i++){
-	  if(i < 8){
-		  initVertexBuffers(gl,-2,.5,(i/2)-4,.5,.5,.5,255/255,255/255,255/255);
-	  }else{
-		  initVertexBuffers(gl,-2,.5,(i/2)+4,.5,.5,.5,255/255,255/255,255/255);
-	  }
-  }
-  for(var i = 0; i < 20; i++){
-	  if(i < 13){
-		  initVertexBuffers(gl,-2,0,(i/2)-4,.5,.5,.5,255/255,255/255,255/255);
-	  }else{
-		  initVertexBuffers(gl,-2,0,(i/2)+2,.5,.5,.5,255/255,255/255,255/255);
-	  }
-  }
-  for(var i = 0; i < 20; i++){
-	  if(i < 10){
-		  initVertexBuffers(gl,-4,0,(i/2)-4,.5,.5,.5,255/255,255/255,255/255);
-	  }else{
-		  initVertexBuffers(gl,-4,0,(i/2)+2,.5,.5,.5,255/255,255/255,255/255);
-	  }
-  }
-  for(var i = 0; i < 20; i++){
-	  if(i < 3){
-		  initVertexBuffers(gl,7,0,(i/2)-4,.5,.5,.5,255/255,255/255,255/255);
-	  }else{
-		  initVertexBuffers(gl,7,0,(i/2)+2,.5,.5,.5,255/255,255/255,255/255);
-	  }
-  }
-  
-  for(var i = 0; i < 28; i++){
-     if(i < 14){
-	     initVertexBuffers(gl,(i/2)-7,0,4,.5,.5,.5,255/255,0/255,0/255);
-     }else{
-		 initVertexBuffers(gl,(i/2)-4,0,4,.5,.5,.5,255/255,0/255,0/255);
-	 }  	  
-  }
-  
-  for(var i = 0; i < 25; i++){
-     if(i < 10){
-	     initVertexBuffers(gl,(i/2)-6,.5,4,.5,.5,.5,255/255,0/255,0/255);
-     }else{
-		 initVertexBuffers(gl,(i/2)-1,.5,4,.5,.5,.5,255/255,0/255,0/255);
-	 }  	  
-  } 
+  // Set the vertex coordinates and color 
+  initVertexBuffers(gl,-1,0,0,1.0,1.0,1.0); //head 0
+  initVertexBuffers(gl,-1,2,0,1.0,1.0,1.0); //head 0
+  initVertexBuffers(gl,1,0,0,1.0,1.0,1.0); //head 0
   initTextures(gl,n);
-  rotateTexturesPieces();
-  scale();
-  translate();
   
   if (n < 0) {
     console.log('Failed to set the vertex information');
     return;
   }
+  
+  rotateTexturesPieces();
+  translate();
+  //scale();
 
   // Specify the color for clearing <canvas>
-  gl.clearColor(102/255, 88/255,223/255, 1.0);
+  gl.clearColor(0.0, 170/255, 0.0, 1.0);
   
   // Get the storage location of u_mvpMatrix
   var u_mvpMatrix = gl.getUniformLocation(gl.program, 'u_mvpMatrix');
@@ -192,8 +89,8 @@ function main() {
   var mvpMatrix = new Matrix4();   // Model view projection matrix
 
   // Calculate the view matrix and the projection matrix
-  modelMatrix.setTranslate(0, 0, 0);
-  viewMatrix.setLookAt(0, 0, 0, 0, 0, -100, 0, 0, 0);
+  //modelMatrix.setTranslate(0.75, 0, 0);
+  viewMatrix.setLookAt(0, 0, 5, 0, 0, -100, 0, 1, 0);
   projMatrix.setPerspective(60, canvas.width/canvas.height, 1, 100);
   // Calculate the model view projection matrix
   mvpMatrix.set(projMatrix).multiply(viewMatrix).multiply(modelMatrix);
@@ -202,19 +99,15 @@ function main() {
   
   // Start drawing
   var tick = function() {
-	//Update Camera Position
-	modelMatrix.setTranslate(TranslateX, 0, TranslateZ);
-    viewMatrix.setLookAt(-1, 0, 0, lookAngle, 0, -100, 0, 1, 0);	
-    mvpMatrix.set(projMatrix).multiply(viewMatrix).multiply(modelMatrix);
-    gl.uniformMatrix4fv(u_mvpMatrix, false, mvpMatrix.elements);	
-	//Draw the World
-	draw(gl,canvas);
-	requestAnimationFrame(tick,canvas);
+	draw(gl,canvas);   // Draw the animal
+	requestAnimationFrame(tick,canvas); // Request that the browser ?calls tick
 	}
 	tick();
 }
 
-function draw(gl,canvas){
+function draw(gl,canvas){	
+    rotateY();
+	rotation = (document.getElementById("perspectiveYRange").value);
 
 	// Create a buffer object
 	var vertexColorbuffer = gl.createBuffer();  
@@ -314,6 +207,7 @@ function initVertexBuffers(gl,x,y,z,scaleX,scaleY,scaleZ,R,G,B) {
 	0.5,   0.5,  0.0,  1,1,1 ,
 	-0.5, -0.5,  0.0,  -1,-1,1,
 	0.5,  -0.5,  0.0,  1,-1,1,
+	
   ]);
   
   var newBufferData = new Float32Array(buffer_data.length+216);
@@ -333,94 +227,27 @@ function initVertexBuffers(gl,x,y,z,scaleX,scaleY,scaleZ,R,G,B) {
   } 
 }
 
-function scale(){
-	for(i = 0; i < scalers.length; i+=3){
-		for(j = 0; j < 36; j++){
-			buffer_data[scalersIndex] = buffer_data[scalersIndex] * scalers[i];
-			buffer_data[scalersIndex+1] = buffer_data[scalersIndex+1] * scalers[i+1];
-			buffer_data[scalersIndex+2] = buffer_data[scalersIndex+2] * scalers[i+2]
-			scalersIndex +=6
-		}
-	}
-	scalersIndex = 0;
-}
-
-function translate(){
-	for(i = 0; i < translaters.length; i+=3){
-		for(j = 0; j < 36; j++){
-			buffer_data[translatersIndex] = buffer_data[translatersIndex] + translaters[i];
-			buffer_data[translatersIndex+1] = buffer_data[translatersIndex+1] + translaters[i+1];
-			buffer_data[translatersIndex+2] = buffer_data[translatersIndex+2] + translaters[i+2]
-			translatersIndex +=6;
-		}
-	}
-	translatersIndex = 0;
-}
-
-function updateCamera(e){
-	//Movement controls
-	if(e.code == "KeyW"){
-		TranslateZ += .5;
-		if(lookAngle < 0){
-			TranslateX += .1;
-		}		
-	}else if(e.code == "KeyS"){
-		TranslateZ -= .5;
-	}
-	if(e.code == "KeyA"){
-		TranslateX += .5;
-	}else if(e.code == "KeyD"){
-		TranslateX -= .5;
-	}
-	
-	//Camera Controls
-	if(e.code == "KeyQ"){
-		lookAngle -= 20;
-	}else if(e.code == "KeyE"){
-		lookAngle += 20;
-	}
-}
-
-function initTextures(gl, n) {
-  var texture = gl.createTexture();   // Create a texture object
-  if (!texture) {
-    console.log('Failed to create the texture object');
-    return false;
-  }
-
-  // Get the storage location of u_Sampler
-  var u_Sampler = gl.getUniformLocation(gl.program, 'u_Sampler');
-  if (!u_Sampler) {
-    console.log('Failed to get the storage location of u_Sampler');
-    return false;
-  }
-  var image = new Image();  // Create the image object
-  if (!image) {
-    console.log('Failed to create the image object');
-    return false;
-  }
-  // Register the event handler to be called on loading an image
-  image.onload = function(){ loadTexture(gl, n, texture, u_Sampler, image); };
-  // Tell the browser to load an image
-  image.src = 'textures/dirt.jpg';
-
-  return true;
-}
-
-function loadTexture(gl, n, texture, u_Sampler, image) {
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
-  // Enable texture unit0
-  gl.activeTexture(gl.TEXTURE0);
-  // Bind the texture object to the target
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-
-  // Set the texture parameters
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  // Set the texture image
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+function rotateY(){
+  //Reset rotation
+  thetaY = (-rotation*Math.PI)/180;
   
-  // Set the texture unit 0 to the sampler
-  gl.uniform1i(u_Sampler, 0);
+  //Rotate around y axis
+  for(i = 0; i < buffer_data.length; i+=6){
+	  var x = (Math.cos(thetaY)*buffer_data[i]) + (Math.sin(thetaY)*buffer_data[i+2])
+	  var z = (-Math.sin(thetaY)*buffer_data[i]) + (Math.cos(thetaY)*buffer_data[i+2])
+	  buffer_data[i] = x;
+	  buffer_data[i+2] =  z;
+  }
+  
+  //Apply new rotation
+  thetaY = (document.getElementById("perspectiveYRange").value*Math.PI)/180;
+  //Rotate around y axis
+  for(i = 0; i < buffer_data.length; i+=6){
+	  var x = (Math.cos(thetaY)*buffer_data[i]) + (Math.sin(thetaY)*buffer_data[i+2])
+	  var z = (-Math.sin(thetaY)*buffer_data[i]) + (Math.cos(thetaY)*buffer_data[i+2])
+	  buffer_data[i] = x;
+	  buffer_data[i+2] =  z;
+  }
 }
 
 function rotateTexturesPieces(){
@@ -480,4 +307,93 @@ function rotateTexturesPieces(){
 		  i+=180;
 	    }	
     }
+}
+
+function scale(){
+	for(i = 0; i < scalers.length; i+=3){
+		for(j = 0; j < 36; j++){
+			buffer_data[scalersIndex] = buffer_data[scalersIndex] * scalers[i];
+			buffer_data[scalersIndex+1] = buffer_data[scalersIndex+1] * scalers[i+1];
+			buffer_data[scalersIndex+2] = buffer_data[scalersIndex+2] * scalers[i+2]
+			scalersIndex +=6
+		}
+	}
+	scalersIndex = 0;
+}
+
+function translate(){
+	for(i = 0; i < translaters.length; i+=3){
+		for(j = 0; j < 36; j++){
+			buffer_data[translatersIndex] = buffer_data[translatersIndex] + translaters[i];
+			buffer_data[translatersIndex+1] = buffer_data[translatersIndex+1] + translaters[i+1];
+			buffer_data[translatersIndex+2] = buffer_data[translatersIndex+2] + translaters[i+2]
+			translatersIndex +=6;
+		}
+	}
+	translatersIndex = 0;
+}
+function unscale(){
+	for(i = 0; i < scalers.length; i+=3){
+		for(j = 0; j < 36; j++){
+			buffer_data[scalersIndex] = buffer_data[scalersIndex] / scalers[i];
+			buffer_data[scalersIndex+1] = buffer_data[scalersIndex+1] / scalers[i+1];
+			buffer_data[scalersIndex+2] = buffer_data[scalersIndex+2] / scalers[i+2];
+			scalersIndex +=6;
+		}
+	}
+	scalersIndex = 0;
+}
+
+function untranslate(){
+	for(i = 0; i < translaters.length; i+=3){
+		for(j = 0; j < 36; j++){
+			buffer_data[translatersIndex] = buffer_data[translatersIndex] - translaters[i];
+			buffer_data[translatersIndex+1] = buffer_data[translatersIndex+1] - translaters[i+1];
+			buffer_data[translatersIndex+2] = buffer_data[translatersIndex+2] - translaters[i+2]
+			translatersIndex +=6;
+		}
+	}
+	translatersIndex = 0;
+}
+
+function initTextures(gl, n) {
+  var texture = gl.createTexture();   // Create a texture object
+  if (!texture) {
+    console.log('Failed to create the texture object');
+    return false;
+  }
+
+  // Get the storage location of u_Sampler
+  var u_Sampler = gl.getUniformLocation(gl.program, 'u_Sampler');
+  if (!u_Sampler) {
+    console.log('Failed to get the storage location of u_Sampler');
+    return false;
+  }
+  var image = new Image();  // Create the image object
+  if (!image) {
+    console.log('Failed to create the image object');
+    return false;
+  }
+  // Register the event handler to be called on loading an image
+  image.onload = function(){ loadTexture(gl, n, texture, u_Sampler, image); };
+  // Tell the browser to load an image
+  image.src = 'textures/dirt.jpg';
+
+  return true;
+}
+
+function loadTexture(gl, n, texture, u_Sampler, image) {
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
+  // Enable texture unit0
+  gl.activeTexture(gl.TEXTURE0);
+  // Bind the texture object to the target
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+
+  // Set the texture parameters
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  // Set the texture image
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+  
+  // Set the texture unit 0 to the sampler
+  gl.uniform1i(u_Sampler, 0);
 }

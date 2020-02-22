@@ -1,20 +1,18 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Assignment 2: Blocky 3D Animal</title>
+    <title>Assignment 3: Creating a Virtual World</title>
 	<script src="lib/webgl-utils.js"></script>
     <script src="lib/webgl-debug.js"></script>
     <script src="lib/cuon-utils.js"></script>
     <script src="lib/cuon-matrix.js"></script>
-    <script src="src/assignment_2.js"></script>
+    <script src="src/assignment_3.js"></script>
   </head>
 
   <body onload="main()">
     <canvas id="webgl" width="800" height="500">
     Please use a browser that supports "canvas"
     </canvas>
-	<div class="slidecontainer">
-		<br> Perspective <br> <input type="range" min="0" max="360" value="0" class="slider" id="perspectiveYRange" input id = "perspectiveYRange">
-	</div>    
+	<onkeydown="updateCamera()">   
   </body>
 </html>
