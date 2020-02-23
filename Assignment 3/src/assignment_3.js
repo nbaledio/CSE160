@@ -14,11 +14,12 @@ var VSHADER_SOURCE =
 var FSHADER_SOURCE =
   '#ifdef GL_ES\n' +
   'precision mediump float;\n' +
+  'uniform vec4 u_FragColor;\n' +  // uniform変数
   '#endif\n' +
   'uniform sampler2D u_Sampler;\n' +
   'varying vec2 v_TexCoord;\n' +
   'void main() {\n' +
-  '  gl_FragColor = texture2D(u_Sampler, v_TexCoord);\n' +
+  'gl_FragColor = u_FragColor + texture2D(u_Sampler, v_TexCoord);\n' +
   '}\n';
   
 var n = 36 * 716;
@@ -68,7 +69,6 @@ function main() {
   
   // Set the vertex coordinates of cubes
   initVertexBuffers(gl,0,-51,0,500.0,100.0,500.0,80/255,237/255,69/255);
-  
   //Make surrounding walls
   //Horizontal
   for(var j = 0; j < 4; j++){
@@ -247,14 +247,27 @@ function draw(gl,canvas){
     // Assign the buffer object to a_TexCoord variable
     gl.vertexAttribPointer(a_TexCoord, 3, gl.FLOAT, false, FSIZE * 6, FSIZE * 3);
     gl.enableVertexAttribArray(a_TexCoord);  // Enable the assignment of the buffer object
+	
+	// Get the storage location of u_FragColor
+    var u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor');
+    if (!u_FragColor) {
+     console.log('Failed to get the storage location of u_FragColor');
+      return;
+    }
 
 	// Unbind the buffer object
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);
   
 	// Clear color and depth buffer
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  
+  	
 	// Draw the cubes
+	gl.uniform4f(u_FragColor, 0.0,1.0,0.0,0.0);
+	gl.disableVertexAttribArray(a_TexCoord);
+	gl.drawArrays(gl.TRIANGLES, 0, 36);
+	
+	gl.uniform4f(u_FragColor, 0.0,0.0,0.0,1.0);
+	gl.enableVertexAttribArray(a_TexCoord);	
 	gl.drawArrays(gl.TRIANGLES, 0, n);
 }
 
