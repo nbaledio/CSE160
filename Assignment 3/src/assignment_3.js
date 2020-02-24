@@ -42,6 +42,9 @@ var newX = 45;
 var TranslateX = -2;
 var TranslateY = 0;
 var TranslateZ = -2;
+
+var rotateX = 0;
+var rotateZ = 0;
 var lookAngle = 0;
 
 function main() {
@@ -192,19 +195,13 @@ function main() {
   var mvpMatrix = new Matrix4();   // Model view projection matrix
 
   // Calculate the view matrix and the projection matrix
-  modelMatrix.setTranslate(0, 0, 0);
-  viewMatrix.setLookAt(0, 0, 0, 0, 0, -100, 0, 0, 0);
   projMatrix.setPerspective(60, canvas.width/canvas.height, 1, 100);
-  // Calculate the model view projection matrix
-  mvpMatrix.set(projMatrix).multiply(viewMatrix).multiply(modelMatrix);
-  // Pass the model view projection matrix
-  gl.uniformMatrix4fv(u_mvpMatrix, false, mvpMatrix.elements);
   
   // Start drawing
   var tick = function() {
 	//Update Camera Position
 	modelMatrix.setTranslate(TranslateX, 0, TranslateZ);
-    viewMatrix.setLookAt(-1, 0, 0, lookAngle, 0, -100, 0, 1, 0);	
+    viewMatrix.setLookAt(-1, 0, 0, rotateX, 0, rotateZ, 0, 1, 0);	
     mvpMatrix.set(projMatrix).multiply(viewMatrix).multiply(modelMatrix);
     gl.uniformMatrix4fv(u_mvpMatrix, false, mvpMatrix.elements);	
 	//Draw the World
@@ -215,7 +212,6 @@ function main() {
 }
 
 function draw(gl,canvas){
-
 	// Create a buffer object
 	var vertexColorbuffer = gl.createBuffer();  
 	if (!vertexColorbuffer) {
@@ -271,8 +267,7 @@ function draw(gl,canvas){
 	gl.drawArrays(gl.TRIANGLES, 0, n);
 }
 
-function initVertexBuffers(gl,x,y,z,scaleX,scaleY,scaleZ,R,G,B) {
-	
+function initVertexBuffers(gl,x,y,z,scaleX,scaleY,scaleZ,R,G,B) {	
   //Push translaters to array
   translaters.push(x);
   translaters.push(y);
@@ -368,30 +363,6 @@ function translate(){
 		}
 	}
 	translatersIndex = 0;
-}
-
-function updateCamera(e){
-	//Movement controls
-	if(e.code == "KeyW"){
-		TranslateZ += .5;
-		if(lookAngle < 0){
-			TranslateX += .1;
-		}		
-	}else if(e.code == "KeyS"){
-		TranslateZ -= .5;
-	}
-	if(e.code == "KeyA"){
-		TranslateX += .5;
-	}else if(e.code == "KeyD"){
-		TranslateX -= .5;
-	}
-	
-	//Camera Controls
-	if(e.code == "KeyQ"){
-		lookAngle -= 20;
-	}else if(e.code == "KeyE"){
-		lookAngle += 20;
-	}
 }
 
 function initTextures(gl, n) {
@@ -493,4 +464,71 @@ function rotateTexturesPieces(){
 		  i+=180;
 	    }	
     }
+}
+
+function updateCamera(e){
+	//Movement controls
+	if(e.code == "KeyW"){
+		TranslateX -= .5;		
+	}else if(e.code == "KeyS"){
+		TranslateX += .5;
+	}
+	if(e.code == "KeyA"){
+		TranslateZ += .5;
+	}else if(e.code == "KeyD"){
+		TranslateZ -= .5;
+	}
+	
+	//Camera Controls
+	if(e.code == "KeyQ"){
+		if(lookAngle >= -180 && lookAngle < 180){
+			lookAngle -= 10;
+		}
+		if(lookAngle > 180 && lookAngle < 270){
+			lookAngle += 10;
+			if(lookAngle == 270){
+				lookAngle = -270;
+			}
+		}
+		if(lookAngle >= -270 && lookAngle <= -190){
+			lookAngle+=10;
+			if(lookAngle == -190){
+				lookAngle = 170;
+			}
+		}
+		
+	}else if(e.code == "KeyE"){
+		if(lookAngle >= -180 && lookAngle < 180){
+			lookAngle += 10;
+		}		
+		if(lookAngle < -180 && lookAngle > -270){
+			lookAngle -= 10;
+			if(lookAngle == -270){
+				lookAngle = 270;
+			}
+		}
+		if(lookAngle <= 270 && lookAngle >= 190){
+			lookAngle-=10;
+			if(lookAngle == 190){
+				lookAngle = -170;
+			}
+		}
+	}
+				
+	//Connect viewing angles
+	if(lookAngle == -180){
+		lookAngle = 190;
+	}else if(lookAngle == 180){
+		lookAngle = -190;
+	}
+	
+		
+	if(lookAngle <= 180 && lookAngle >= -180){
+		rotateX = (Math.cos(lookAngle*Math.PI/180));
+		rotateZ = (Math.sin(lookAngle*Math.PI/180));
+	}else{
+		rotateX = (1/Math.cos(lookAngle*Math.PI/180));
+		rotateZ = (1/Math.sin(lookAngle*Math.PI/180));
+	}
+	console.log(lookAngle);
 }
