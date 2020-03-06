@@ -45,8 +45,16 @@ var lightYPos = 0;
 var theta = 0;
 var lightRadius = 5;
 var enableLighting = true;
+var cubeTranslateX = 0;
+var cubeTranslateY = 0;
+var cubeTranslateZ = -3;
+var TranslateX = 0;
+var TranslateZ = 0;
     
 function main() {
+  //Add keydown event listener
+  document.addEventListener('keydown', updateCamera);
+  
   // Retrieve <canvas> element
   var canvas = document.getElementById('webgl');
 
@@ -114,17 +122,26 @@ function main() {
   gl.uniformMatrix4fv(u_NormalMatrix, false, normalMatrix.elements);
   
   var tick = function() {
+	//Circle light around Z Axis
 	theta += .01;
 	if(theta > 360){
 		theta = 0;
 	}
 	lightXPos = Math.cos(theta) * lightRadius;
 	lightYPos = Math.sin(theta) * lightRadius;
-    gl.uniform3f(u_LightPosition, lightXPos, lightYPos, 0.0);
+    gl.uniform3f(u_LightPosition, lightXPos, lightYPos, -2.0);
+	
+	//Update Camera
+	//mvpMatrix.setTranslate(TranslateX, 0, TranslateZ);
+	// Pass the model view projection matrix to u_MvpMatrix
+    gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements);
+	
     // Clear color and depth buffer
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	
     // Draw the cube(Note that the 3rd argument is the gl.UNSIGNED_SHORT)
     gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_SHORT, 0);
+	
 	requestAnimationFrame(tick,canvas);
   }
 	tick();
@@ -192,10 +209,12 @@ function initVertexBuffers(gl) { // Create a sphere
     }
   }
   
+  console.log(indices);
+  
   // Generate indices
-  for (j = 0; j <= SPHERE_DIV; j++) {
-    for (i = 0; i <= SPHERE_DIV; i++) {
-      p1 = (j * (SPHERE_DIV+1) + i) + 195;
+  for (j = 0; j < SPHERE_DIV; j++) {
+    for (i = 0; i < SPHERE_DIV; i++) {
+      p1 = (j * (SPHERE_DIV+1) + i) + 196;
       p2 = p1 + (SPHERE_DIV+1);
 
       indices.push(p1);
@@ -218,12 +237,12 @@ function initVertexBuffers(gl) { // Create a sphere
   //  |/      |/
   //  v2------v3
   var vertices = new Float32Array([   // Coordinates
-     0.5, 0.5, 0.5,  -0.5, 0.5, 0.5,  -0.5,-0.5, 0.5,   0.5,-0.5, 0.5, // v0-v1-v2-v3 front
-     0.5, 0.5, 0.5,   0.5,-0.5, 0.5,   0.5,-0.5,-0.5,   0.5, 0.5,-0.5, // v0-v3-v4-v5 right
-     0.5, 0.5, 0.5,   0.5, 0.5,-0.5,  -0.5, 0.5,-0.5,  -0.5, 0.5, 0.5, // v0-v5-v6-v1 up
-    -0.5, 0.5, 0.5,  -0.5, 0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5,-0.5, 0.5, // v1-v6-v7-v2 left
-    -0.5,-0.5,-0.5,   0.5,-0.5,-0.5,   0.5,-0.5, 0.5,  -0.5,-0.5, 0.5, // v7-v4-v3-v2 down
-     0.5,-0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5, 0.5,-0.5,   0.5, 0.5,-0.5,  // v4-v7-v6-v5 back
+     1.0 + cubeTranslateX, 1.0 + cubeTranslateY, 1.0 + cubeTranslateZ,  -1.0 + cubeTranslateX, 1.0 + cubeTranslateY, 1.0 + cubeTranslateZ,  -1.0 + cubeTranslateX,-1.0 + cubeTranslateY, 1.0 + cubeTranslateZ,   1.0 + cubeTranslateX,-1.0 + cubeTranslateY, 1.0 + cubeTranslateZ, // v0-v1-v2-v3 front
+     1.0 + cubeTranslateX, 1.0 + cubeTranslateY, 1.0 + cubeTranslateZ,   1.0 + cubeTranslateX,-1.0 + cubeTranslateY, 1.0 + cubeTranslateZ,   1.0 + cubeTranslateX,-1.0 + cubeTranslateY,-1.0 + cubeTranslateZ,   1.0 + cubeTranslateX, 1.0 + cubeTranslateY,-1.0 + cubeTranslateZ, // v0-v3-v4-v5 right
+     1.0 + cubeTranslateX, 1.0 + cubeTranslateY, 1.0 + cubeTranslateZ,   1.0 + cubeTranslateX, 1.0 + cubeTranslateY,-1.0 + cubeTranslateZ,  -1.0 + cubeTranslateX, 1.0 + cubeTranslateY,-1.0 + cubeTranslateZ,  -1.0 + cubeTranslateX, 1.0 + cubeTranslateY, 1.0 + cubeTranslateZ, // v0-v5-v6-v1 up
+    -1.0 + cubeTranslateX, 1.0 + cubeTranslateY, 1.0 + cubeTranslateZ,  -1.0 + cubeTranslateX, 1.0 + cubeTranslateY,-1.0 + cubeTranslateZ,  -1.0 + cubeTranslateX,-1.0 + cubeTranslateY,-1.0 + cubeTranslateZ,  -1.0 + cubeTranslateX,-1.0 + cubeTranslateY, 1.0 + cubeTranslateZ, // v1-v6-v7-v2 left
+    -1.0 + cubeTranslateX,-1.0 + cubeTranslateY,-1.0 + cubeTranslateZ,   1.0 + cubeTranslateX,-1.0 + cubeTranslateY,-1.0 + cubeTranslateZ,   1.0 + cubeTranslateX,-1.0 + cubeTranslateY, 1.0 + cubeTranslateZ,  -1.0+ cubeTranslateX,-1.0 + cubeTranslateY, 1.0 + cubeTranslateZ, // v7-v4-v3-v2 down
+     1.0 + cubeTranslateX,-1.0 + cubeTranslateY,-1.0 + cubeTranslateZ,  -1.0 + cubeTranslateX,-1.0 + cubeTranslateY,-1.0 + cubeTranslateZ,  -1.0 + cubeTranslateX, 1.0 + cubeTranslateY,-1.0 + cubeTranslateZ,   1.0 + cubeTranslateX, 1.0 + cubeTranslateY,-1.0 + cubeTranslateZ,  // v4-v7-v6-v5 back
   ]);
   
   //Generate Coordinates
@@ -232,10 +251,26 @@ function initVertexBuffers(gl) { // Create a sphere
   }
   
   //Generate indices
-  //for(){
-	  
-  //}
+  var cubeIndices = new Uint8Array([
+     0, 1, 2,   0, 2, 3,    // front
+     4, 5, 6,   4, 6, 7,    // right
+     8, 9,10,   8,10,11,    // up
+    12,13,14,  12,14,15,    // left
+    16,17,18,  16,18,19,    // down
+    20,21,22,  20,22,23,     // back
+	
+	24, 25, 26,   24, 26, 27,  // front
+    28, 29, 30,   28, 30, 31,  // right
+    32, 33,34,    32,34,35,    // up
+    36,37,38,     36,38,39,    // left
+    40,41,42,     40,42,43,    // down
+    44,45,46,     44,46,47     // back
+  ]);
   
+  for(i = 0; i < cubeIndices.length; i++){
+	  indices.push(cubeIndices[i]+392);
+  }
+  console.log(indices);
 
   // Write the vertex property to buffers (coordinates and normals)
   // Same data can be used for vertex and normal
@@ -281,4 +316,19 @@ function initArrayBuffer(gl, attribute, data, type, num) {
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
   return true;
+}
+
+function updateCamera(e){
+	console.log("T");
+	//Movement controls
+	if(e.code == "KeyW"){
+		TranslateZ -= .5;		
+	}else if(e.code == "KeyS"){
+		TranslateZ += .5;
+	}
+	if(e.code == "KeyA"){
+		TranslateX += .5;
+	}else if(e.code == "KeyD"){
+		TranslateX -= .5;
+	}
 }
