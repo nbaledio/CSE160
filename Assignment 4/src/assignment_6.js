@@ -12,7 +12,7 @@ var VSHADER_SOURCE =
   'uniform vec3 u_AmbientLight;\n' +   // Ambient light color
   'varying vec4 v_Color;\n' +
   'void main() {\n' +
-  '  vec4 color = vec4(1.0, 1.0, 1.0, 1.0);\n' + // Sphere color
+  '  vec4 color = vec4(1.0, 0.0, 0.0, 1.0);\n' + // Sphere color
   '  gl_Position = u_MvpMatrix * a_Position;\n' +
      // Calculate a normal to be fit with a model matrix, and make it 1.0 in length
   '  vec3 normal = normalize(vec3(u_NormalMatrix * a_Normal));\n' +
@@ -34,10 +34,11 @@ var VSHADER_SOURCE =
 var FSHADER_SOURCE =
   '#ifdef GL_ES\n' +
   'precision mediump float;\n' +
+  'uniform vec4 u_FragColor;\n' +  // uniform変数
   '#endif\n' +
   'varying vec4 v_Color;\n' +
   'void main() {\n' +
-  '  gl_FragColor = v_Color;\n' +
+  '  gl_FragColor = v_Color + u_FragColor;\n' +
   '}\n';
   
 var lightXPos = 0;
@@ -119,7 +120,10 @@ function main() {
   normalMatrix.setInverseOf(modelMatrix);
   normalMatrix.transpose();
   // Pass the transformation matrix for normals to u_NormalMatrix
-  gl.uniformMatrix4fv(u_NormalMatrix, false, normalMatrix.elements);
+  gl.uniformMatrix4fv(u_NormalMatrix, false, normalMatrix.elements); 
+
+  var u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor'); 
+  gl.uniform4f(u_FragColor, 0.0,0.0,0.0,0.0);  
   
   var tick = function() {
 	//Circle light around Z Axis
@@ -131,8 +135,17 @@ function main() {
 	lightYPos = Math.sin(theta) * lightRadius;
     gl.uniform3f(u_LightPosition, lightXPos, lightYPos, -2.0);
 	
+	//Lighting Option
+	if(enableLighting){
+		gl.uniform3f(u_LightColor, 0.8, 0.8, 0.8);
+		gl.uniform4f(u_FragColor, 0.0,0.0,0.0,0.0); 
+	}else{
+		gl.uniform3f(u_LightColor, 0.0, 0.0, 0.0);
+		gl.uniform4f(u_FragColor, 0.0,0.0,0.0,1.0);
+	}
+	
 	//Update Camera
-	//mvpMatrix.setTranslate(TranslateX, 0, TranslateZ);
+	//mvpMatrix.lookAt(0, 0, 0, 0, 0, 0, 0, 1, 0);
 	// Pass the model view projection matrix to u_MvpMatrix
     gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements);
 	
@@ -209,8 +222,6 @@ function initVertexBuffers(gl) { // Create a sphere
     }
   }
   
-  console.log(indices);
-  
   // Generate indices
   for (j = 0; j < SPHERE_DIV; j++) {
     for (i = 0; i < SPHERE_DIV; i++) {
@@ -270,7 +281,6 @@ function initVertexBuffers(gl) { // Create a sphere
   for(i = 0; i < cubeIndices.length; i++){
 	  indices.push(cubeIndices[i]+392);
   }
-  console.log(indices);
 
   // Write the vertex property to buffers (coordinates and normals)
   // Same data can be used for vertex and normal
@@ -331,4 +341,8 @@ function updateCamera(e){
 	}else if(e.code == "KeyD"){
 		TranslateX -= .5;
 	}
+}
+
+function ToggleLighting(){
+	enableLighting = !enableLighting;
 }
