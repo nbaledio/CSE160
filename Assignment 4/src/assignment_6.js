@@ -43,14 +43,19 @@ var FSHADER_SOURCE =
   
 var lightXPos = 0;
 var lightYPos = 0;
+var lightZPos = -2.0;
 var theta = 0;
 var lightRadius = 5;
 var enableLighting = true;
 var cubeTranslateX = 0;
 var cubeTranslateY = 0;
-var cubeTranslateZ = -3;
+var cubeTranslateZ = -2;
 var TranslateX = 0;
 var TranslateZ = 0;
+var rotation = 0;
+
+var positions = [];
+var indices = [];
     
 function main() {
   //Add keydown event listener
@@ -111,7 +116,7 @@ function main() {
 
   // Calculate the view projection matrix
   mvpMatrix.setPerspective(30, canvas.width/canvas.height, 1, 100);
-  mvpMatrix.lookAt(0, 0, 6, 0, 0, 0, 0, 1, 0);
+  mvpMatrix.lookAt(0, 0, 9, 0, 0, 0, 0, 1, 0);
   mvpMatrix.multiply(modelMatrix);
   // Pass the model view projection matrix to u_MvpMatrix
   gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements);
@@ -126,14 +131,8 @@ function main() {
   gl.uniform4f(u_FragColor, 0.0,0.0,0.0,0.0);  
   
   var tick = function() {
-	//Circle light around Z Axis
-	theta += .01;
-	if(theta > 360){
-		theta = 0;
-	}
-	lightXPos = Math.cos(theta) * lightRadius;
-	lightYPos = Math.sin(theta) * lightRadius;
-    gl.uniform3f(u_LightPosition, lightXPos, lightYPos, -2.0);
+	rotateLight();
+    gl.uniform3f(u_LightPosition, lightXPos, lightYPos, lightZPos);
 	
 	//Lighting Option
 	if(enableLighting){
@@ -145,7 +144,10 @@ function main() {
 	}
 	
 	//Update Camera
-	//mvpMatrix.lookAt(0, 0, 0, 0, 0, 0, 0, 1, 0);
+	positions = [];
+	indices = [];
+	var n = initVertexBuffers(gl);	
+	
 	// Pass the model view projection matrix to u_MvpMatrix
     gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements);
 	
@@ -167,9 +169,6 @@ function initVertexBuffers(gl) { // Create a sphere
   var j, aj, sj, cj;
   var p1, p2;
 
-  var positions = [];
-  var indices = [];
-
   //SPHERE 1 (LEFT)
 
   // Generate coordinates
@@ -182,7 +181,7 @@ function initVertexBuffers(gl) { // Create a sphere
       si = Math.sin(ai);
       ci = Math.cos(ai);
 
-      positions.push((si * sj)-1.25);  // X
+      positions.push((si * sj)-2);  // X
       positions.push(cj);       // Y
       positions.push(ci * sj);  // Z
     }
@@ -216,7 +215,7 @@ function initVertexBuffers(gl) { // Create a sphere
       si = Math.sin(ai);
       ci = Math.cos(ai);
 
-      positions.push((si * sj)+1.25);  // X
+      positions.push((si * sj)+2);  // X
       positions.push(cj);     // Y
       positions.push(ci * sj);  // Z
     }
@@ -281,6 +280,8 @@ function initVertexBuffers(gl) { // Create a sphere
   for(i = 0; i < cubeIndices.length; i++){
 	  indices.push(cubeIndices[i]+392);
   }
+  
+  rotateY(gl);
 
   // Write the vertex property to buffers (coordinates and normals)
   // Same data can be used for vertex and normal
@@ -345,4 +346,32 @@ function updateCamera(e){
 
 function ToggleLighting(){
 	enableLighting = !enableLighting;
+}
+
+function rotateY(gl){
+  //Apply new rotation
+  thetaY = (document.getElementById("perspectiveYRange").value*Math.PI)/180;
+  //Rotate around y axis
+  for(i = 0; i < positions.length; i+=3){
+	  var x = (Math.cos(thetaY)*positions[i]) + (Math.sin(thetaY)*positions[i+2])
+	  var z = (-Math.sin(thetaY)*positions[i]) + (Math.cos(thetaY)*positions[i+2])
+	  positions[i] = x;
+	  positions[i+2] =  z;
+  }
+}
+
+function rotateLight(){
+	//Circle light around Z Axis
+	theta += .01;
+	if(theta > 360){
+		theta = 0;
+	}
+	
+	lightXPos = Math.cos(theta) * lightRadius;
+	lightYPos = Math.sin(theta) * lightRadius;
+	
+	//Rotate Around Y-Axis
+	thetaY = (document.getElementById("perspectiveYRange").value*Math.PI)/180;
+	//lightXPos = (Math.cos(thetaY)*lightXPos) + (Math.sin(thetaY)*lightZPos)
+	//lightZPos = (-Math.sin(thetaY)*lightXPos) + (Math.cos(thetaY)*lightZPos)
 }

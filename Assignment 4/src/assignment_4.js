@@ -450,6 +450,3 @@ function updateCamera(e){
 	console.log(lookAngle);
 }
 
-function ToggleLighting(){
-	enableLighting = !enableLighting;
-}
