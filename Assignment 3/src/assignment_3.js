@@ -22,7 +22,7 @@ var FSHADER_SOURCE =
   'gl_FragColor = u_FragColor + texture2D(u_Sampler, v_TexCoord);\n' +
   '}\n';
   
-var n = 36 * 716;
+var n = 36 * 700;
 var buffer_data = new Float32Array();
 var translaters = [];
 var scalers = [];
@@ -530,5 +530,5 @@ function updateCamera(e){
 		rotateX = (1/Math.cos(lookAngle*Math.PI/180));
 		rotateZ = (1/Math.sin(lookAngle*Math.PI/180));
 	}
-	console.log(lookAngle);
+	console.log(e.code);
 }
